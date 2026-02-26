@@ -37,10 +37,23 @@ export default function Hero({ onOpenValuationModel, onOpenWorthXPro }: HeroProp
       
       // Use deterministic random based on username
       const cleanUser = profile.username.toLowerCase();
-      const isHuge = followers > 100000;
       
       // Calculate derived metrics deterministically so they are always the same for a specific user
-      const engagementRate = isHuge ? (seededRandom(cleanUser, 1) * 2) + 0.1 : (seededRandom(cleanUser, 1) * 5) + 0.5;
+      let minEng = 0.5;
+      let randEng = 5.0;
+
+      if (followers > 10000000) { // 10M+
+        minEng = 4.5;
+        randEng = 4.0;
+      } else if (followers > 1000000) { // 1M+
+        minEng = 3.0;
+        randEng = 3.5;
+      } else if (followers > 100000) { // 100k+
+        minEng = 1.5;
+        randEng = 3.0;
+      }
+
+      const engagementRate = (seededRandom(cleanUser, 1) * randEng) + minEng;
       
       const verified = profile.isVerified;
       const profileScore = Math.floor(seededRandom(cleanUser, 3) * 100);
@@ -49,9 +62,11 @@ export default function Hero({ onOpenValuationModel, onOpenWorthXPro }: HeroProp
 
       let tier = "Normal";
       let multiplier = 1.0;
-      if (engagementRate < 1.0) { tier = "Bronze"; multiplier = 0.8; }
-      else if (engagementRate > 3.5) { tier = "Elite"; multiplier = 1.8; }
-      else if (engagementRate > 2.0) { tier = "Gold"; multiplier = 1.3; }
+      
+      if (engagementRate >= 3.5 || followers > 5000000) { tier = "Elite"; multiplier = 1.8; }
+      else if (engagementRate >= 2.0 || followers > 1000000) { tier = "Gold"; multiplier = 1.3; }
+      else if (engagementRate < 1.0 && followers < 100000) { tier = "Bronze"; multiplier = 0.8; }
+      else { tier = "Normal"; multiplier = 1.0; }
 
       const valueUSD = Math.max(10, baseValue * multiplier);
       const valueIDR = valueUSD * 15500;
