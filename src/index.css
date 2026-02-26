@@ -1,0 +1,27 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-accent: #646cff;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+  --color-bg-panel: rgba(255, 255, 255, 0.03);
+}
+
+@layer base {
+  body {
+    @apply bg-white text-black dark:bg-black dark:text-white font-sans m-0 min-h-screen overflow-x-hidden transition-colors duration-300;
+  }
+}
+
+.bg-grid {
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+
+.dark .bg-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
