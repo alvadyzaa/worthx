@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./frontend/public/favicon.svg" alt="WorthX Logo" width="100" height="100">
+  
   <h1 align="center">WorthX • X Account Valuation</h1>
 
   <p align="center">
@@ -102,3 +102,4 @@ npx wrangler pages deploy dist --project-name worthx
 <div align="center">
 Made with ❤️ using React & Tailwind CSS. Not affiliated with X Corp.
 </div>
+
