@@ -39,18 +39,30 @@ export default function Hero({ onOpenValuationModel, onOpenWorthXPro }: HeroProp
       const cleanUser = profile.username.toLowerCase();
       
       // Calculate derived metrics deterministically so they are always the same for a specific user
-      let minEng = 0.5;
-      let randEng = 5.0;
+      let minEng = 0.1;
+      let randEng = 1.5;
 
-      if (followers > 10000000) { // 10M+
-        minEng = 4.5;
-        randEng = 4.0;
+      if (followers > 5000000) { // 5M+
+        minEng = 3.5;
+        randEng = 5.0; // 3.5% to 8.5% -> Elite Guaranteed
       } else if (followers > 1000000) { // 1M+
-        minEng = 3.0;
-        randEng = 3.5;
+        minEng = 2.0;
+        randEng = 4.0; // 2.0% to 6.0% -> Gold or Elite
       } else if (followers > 100000) { // 100k+
-        minEng = 1.5;
-        randEng = 3.0;
+        minEng = 1.0;
+        randEng = 3.0; // 1.0% to 4.0% -> Normal to Elite
+      } else if (followers > 10000) { // 10k+
+        minEng = 0.5;
+        randEng = 2.5; // 0.5% to 3.0% -> Bronze to Gold
+      } else {
+        // Less than 10k followers
+        minEng = 0.1;
+        randEng = 1.8; // 0.1% to 1.9% -> Bronze to Normal
+      }
+
+      if (cleanUser === 'elonmusk' || cleanUser === 'cristiano' || cleanUser === 'mrbeast') {
+          minEng = 5.0;
+          randEng = 5.0;
       }
 
       const engagementRate = (seededRandom(cleanUser, 1) * randEng) + minEng;
@@ -58,17 +70,39 @@ export default function Hero({ onOpenValuationModel, onOpenWorthXPro }: HeroProp
       const verified = profile.isVerified;
       const profileScore = Math.floor(seededRandom(cleanUser, 3) * 100);
 
-      const baseValue = (followers * 0.45) + (engagementRate * 1000) + (verified ? 2000 : 0) + (profileScore * 50) - (following * 0.05);
+      // Value scaling based on follower volume
+      let baseValue = 0;
+      if (followers <= 1000) {
+        baseValue = followers * 0.1;
+      } else if (followers <= 10000) {
+        baseValue = 100 + ((followers - 1000) * 0.2);
+      } else if (followers <= 100000) {
+        baseValue = 1900 + ((followers - 10000) * 0.5);
+      } else if (followers <= 1000000) {
+        baseValue = 46900 + ((followers - 100000) * 1.0);
+      } else {
+        baseValue = 946900 + ((followers - 1000000) * 2.5);
+      }
+
+      const scoreBonus = (profileScore / 100) * (followers * 0.05);
+      baseValue += scoreBonus;
+      
+      if (verified) {
+         baseValue += followers > 5000 ? 1000 : 50;
+      }
+
+      const followingPenalty = (following > followers && followers > 0) ? (baseValue * 0.1) : 0;
+      baseValue -= followingPenalty;
 
       let tier = "Normal";
       let multiplier = 1.0;
       
-      if (engagementRate >= 3.5 || followers > 5000000) { tier = "Elite"; multiplier = 1.8; }
-      else if (engagementRate >= 2.0 || followers > 1000000) { tier = "Gold"; multiplier = 1.3; }
-      else if (engagementRate < 1.0 && followers < 100000) { tier = "Bronze"; multiplier = 0.8; }
-      else { tier = "Normal"; multiplier = 1.0; }
+      if (engagementRate >= 3.5) { tier = "Elite"; multiplier = 1.8; }
+      else if (engagementRate >= 2.0) { tier = "Gold"; multiplier = 1.3; }
+      else if (engagementRate >= 1.0) { tier = "Normal"; multiplier = 1.0; }
+      else { tier = "Bronze"; multiplier = 0.8; }
 
-      const valueUSD = Math.max(10, baseValue * multiplier);
+      const valueUSD = Math.max(5, baseValue * multiplier);
       const valueIDR = valueUSD * 15500;
 
       setResult({
